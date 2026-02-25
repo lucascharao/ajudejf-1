@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajude JF — Central de Apoio Emergencial</title>
+  <meta name="description" content="Plataforma de apoio emergencial para Juiz de Fora e região. Cadastre abrigos, pontos de doação, pessoas desaparecidas e muito mais." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-dark:  #1a3a5c;
+      --blue-main:  #2e6da4;
+      --blue-light: #4a8ec2;
+      --red:        #c0392b;
+      --red-light:  #e74c3c;
+      --green:      #27ae60;
+      --gold:       #f39c12;
+      --white:      #ffffff;
+      --gray-50:    #f8fafc;
+      --gray-100:   #f1f5f9;
+      --gray-200:   #e2e8f0;
+      --gray-400:   #94a3b8;
+      --gray-600:   #475569;
+      --gray-800:   #1e293b;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,.12);
+      --shadow-md:  0 4px 16px rgba(0,0,0,.12);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,.18);
+      --radius:     8px;
+      --radius-lg:  14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── EMERGENCY BANNER ── */
+    .emergency-banner {
+      background: var(--red);
+      color: var(--white);
+      text-align: center;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .3px;
+    }
+    .emergency-banner a { color: var(--white); text-decoration: underline; }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--blue-dark);
+      padding: 0 24px;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 72px;
+    }
+    .header-logo {
+      height: 52px;
+      width: auto;
+      flex-shrink: 0;
+    }
+    .header-title {
+      flex: 1;
+    }
+    .header-title h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .header-title p {
+      font-size: 12px;
+      color: rgba(255,255,255,.7);
+      margin-top: 2px;
+    }
+    .header-badge {
+      background: var(--red);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      flex-shrink: 0;
+    }
+
+    /* ── PAGE LAYOUT ── */
+    .page-layout {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-right: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 32px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      width: 160px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .sidebar-divider {
+      width: 100%;
+      border: none;
+      border-top: 1px solid var(--gray-200);
+      margin: 28px 0;
+    }
+    .sidebar-nums {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sidebar-num {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gray-50);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      border: 1px solid var(--gray-200);
+    }
+    .sidebar-num-icon { font-size: 18px; flex-shrink: 0; }
+    .sidebar-num-label { font-size: 10px; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; line-height: 1; }
+    .sidebar-num-value { font-size: 17px; font-weight: 800; color: var(--blue-dark); line-height: 1; margin-top: 2px; }
+    .sidebar-tagline {
+      margin-top: 28px;
+      font-size: 11px;
+      color: var(--gray-400);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      min-width: 0;
+      padding: 32px 32px 60px;
+      max-width: 860px;
+    }
+
+    @media(max-width: 720px) {
+      .sidebar { display: none; }
+      main { padding: 24px 16px 60px; }
+    }
+
+    /* ── STEPS ── */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    /* ── STEP INDICATOR ── */
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 32px;
+    }
+    .step-dot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+    }
+    .step-dot-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      color: var(--gray-400);
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .3s;
+    }
+    .step-dot.done .step-dot-circle { background: var(--green); color: var(--white); }
+    .step-dot.active .step-dot-circle { background: var(--blue-main); color: var(--white); }
+    .step-dot-label {
+      font-size: 10px;
+      color: var(--gray-400);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      white-space: nowrap;
+    }
+    .step-dot.active .step-dot-label { color: var(--blue-main); }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--gray-200);
+      margin-top: -16px;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      margin-bottom: 24px;
+    }
+    .section-header h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      margin-bottom: 6px;
+    }
+    .section-header p {
+      font-size: 15px;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+
+    /* ── CARDS GRID ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .cards-grid.cities { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+    .card-btn {
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-btn:hover {
+      border-color: var(--blue-light);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .card-btn.selected {
+      border-color: var(--blue-main);
+      background: #eef5fb;
+    }
+    .card-icon {
+      font-size: 34px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .card-flag {
+      width: 72px;
+      height: 46px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin: 0 auto 10px;
+      display: block;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    .card-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      line-height: 1.3;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--gray-600);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    /* ── FORM ── */
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 32px;
+    }
+    .form-context-bar {
+      background: var(--blue-dark);
+      color: var(--white);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .ctx-tag {
+      background: rgba(255,255,255,.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 6px;
+    }
+    label .req { color: var(--red); margin-left: 2px; }
+    label .tip { font-weight: 400; color: var(--gray-600); font-size: 12px; margin-left: 4px; }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="number"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-size: 15px;
+      color: var(--gray-800);
+      background: var(--white);
+      transition: border-color .2s;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blue-main);
+      box-shadow: 0 0 0 3px rgba(46,109,164,.1);
+    }
+    textarea { resize: vertical; min-height: 90px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media(max-width:600px) { .form-row { grid-template-columns: 1fr; } }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue-main);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .checkbox-item span {
+      font-size: 14px;
+      color: var(--gray-800);
+    }
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .radio-item input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--blue-main);
+    }
+
+    .pix-box {
+      background: #fff8e6;
+      border: 1.5px solid #f6c84b;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-top: 10px;
+    }
+    .pix-box .pix-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #7d5a00;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1.5px solid var(--gray-200);
+      margin: 24px 0;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--blue-main);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 13px 28px;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--blue-main);
+      color: var(--white);
+    }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--gray-800);
+      border: 1.5px solid var(--gray-200);
+    }
+    .btn-secondary:hover { background: var(--gray-200); }
+    .btn-red {
+      background: var(--red);
+      color: var(--white);
+    }
+    .btn-red:hover { background: #a93226; }
+    .btn-green {
+      background: var(--green);
+      color: var(--white);
+    }
+    .btn-green:hover { background: #229954; }
+    .btn-whatsapp {
+      background: #25d366;
+      color: var(--white);
+    }
+    .btn-whatsapp:hover { background: #1ebe5d; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── SUCCESS ── */
+    .success-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .success-icon { font-size: 64px; margin-bottom: 16px; }
+    .success-card h2 { font-size: 24px; color: var(--blue-dark); margin-bottom: 10px; }
+    .success-card p { font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+    .summary-box {
+      background: var(--gray-100);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin: 24px 0;
+      text-align: left;
+      font-size: 14px;
+      color: var(--gray-800);
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-family: monospace;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    /* ── ALERT ── */
+    .alert {
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .alert-warning { background: #fff3cd; border-left: 4px solid var(--gold); color: #7d5a00; }
+    .alert-info    { background: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--blue-dark);
+      color: rgba(255,255,255,.7);
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+    }
+    footer strong { color: var(--white); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:480px) {
+      .header-inner { height: 60px; }
+      .header-logo { height: 40px; }
+      .header-title h1 { font-size: 16px; }
+      .form-card { padding: 20px 16px; }
+      .cards-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- EMERGENCY BANNER -->
+<div class="emergency-banner">
+  SITUAÇÃO DE EMERGÊNCIA — Juiz de Fora e Região &nbsp;|&nbsp; Emergências: <strong>193</strong> (Bombeiros) &nbsp;|&nbsp; <strong>192</strong> (SAMU) &nbsp;|&nbsp; <strong>199</strong> (Defesa Civil)
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-title">
+      <h1>Ajude JF</h1>
+      <p>Central de Apoio Emergencial — Juiz de Fora e Região</p>
+    </div>
+    <span class="header-badge">Emergência</span>
+  </div>
+</header>
+
+<div class="page-layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <img src="logo-transparent.png" alt="Ajude JF" class="sidebar-logo" />
+  <hr class="sidebar-divider" />
+  <div class="sidebar-nums">
+    <div class="sidebar-num">
+      <span class="sidebar-num-icon">🚒</span>
+      <div>
+        <div class="sidebar-num-label">Bombeiros</div>
+        <div class="sidebar-num-value">193</div>
+      </div>
+    </div>
+    <div class="sidebar-num">
+      <span class="sidebar-num-icon">🚑</span>
+      <div>
+        <div class="sidebar-num-label">SAMU</div>
+        <div class="sidebar-num-value">192</div>
+      </div>
+    </div>
+    <div class="sidebar-num">
+      <span class="sidebar-num-icon">🛡️</span>
+      <div>
+        <div class="sidebar-num-label">Defesa Civil</div>
+        <div class="sidebar-num-value">199</div>
+      </div>
+    </div>
+  </div>
+  <p class="sidebar-tagline">Plataforma de apoio à comunidade de Juiz de Fora e região</p>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ═══════════════════════════════ STEP 1 — CIDADE ═══════════════════════════════ -->
+  <div class="step active" id="step-1">
+
+    <div class="step-indicator">
+      <div class="step-dot active">
+        <div class="step-dot-circle">1</div>
+        <div class="step-dot-label">Cidade</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle">2</div>
+        <div class="step-dot-label">Tipo</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle">3</div>
+        <div class="step-dot-label">Cadastro</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle">4</div>
+        <div class="step-dot-label">Concluído</div>
+      </div>
+    </div>
+
+    <div class="alert alert-warning">
+      <span>⚠️</span>
+      <span>Este formulário é para registro de informações emergenciais. Para situações de risco imediato ligue <strong>193 (Bombeiros)</strong> ou <strong>199 (Defesa Civil)</strong>.</span>
+    </div>
+
+    <div class="section-header">
+      <h2>Selecione a cidade</h2>
+      <p>Escolha a cidade à qual a informação se refere para iniciar o cadastro.</p>
+    </div>
+
+    <div class="cards-grid cities" id="city-cards">
+      <button class="card-btn" onclick="selectCity('Juiz de Fora')">
+        <img src="flag-jf.png" alt="Bandeira de Juiz de Fora" class="card-flag" />
+        <div class="card-label">Juiz de Fora</div>
+        <div class="card-desc">Cidade principal</div>
+      </button>
+      <button class="card-btn" onclick="selectCity('Ubá')">
+        <img src="flag-uba.jpg" alt="Bandeira de Ubá" class="card-flag" />
+        <div class="card-label">Ubá</div>
+        <div class="card-desc">Zona da Mata</div>
+      </button>
+      <button class="card-btn" onclick="selectCity('Senador Firmino')">
+        <img src="flag-senador.jpg" alt="Bandeira de Senador Firmino" class="card-flag" />
+        <div class="card-label">Senador Firmino</div>
+        <div class="card-desc">Zona da Mata</div>
+      </button>
+      <button class="card-btn" onclick="selectCity('Matias Barbosa')">
+        <img src="flag-matias.jpg" alt="Bandeira de Matias Barbosa" class="card-flag" />
+        <div class="card-label">Matias Barbosa</div>
+        <div class="card-desc">Entorno de JF</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ STEP 2 — TIPO ═══════════════════════════════ -->
+  <div class="step" id="step-2">
+
+    <div class="step-indicator">
+      <div class="step-dot done">
+        <div class="step-dot-circle">✓</div>
+        <div class="step-dot-label">Cidade</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot active">
+        <div class="step-dot-circle">2</div>
+        <div class="step-dot-label">Tipo</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle">3</div>
+        <div class="step-dot-label">Cadastro</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle">4</div>
+        <div class="step-dot-label">Concluído</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>O que deseja cadastrar?</h2>
+      <p>Cidade selecionada: <strong id="selected-city-label">—</strong> &nbsp;·&nbsp; <a href="#" onclick="goStep(1);return false;" style="color:var(--blue-main)">Trocar cidade</a></p>
+    </div>
+
+    <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+      <button class="card-btn" onclick="selectType('abrigo')">
+        <span class="card-icon">🏠</span>
+        <div class="card-label">Abrigo</div>
+        <div class="card-desc">Cadastrar local disponível para acolher desabrigados</div>
+      </button>
+      <button class="card-btn" onclick="selectType('doacao')">
+        <span class="card-icon">📦</span>
+        <div class="card-label">Ponto de Doação</div>
+        <div class="card-desc">Local de coleta física + informar chave PIX</div>
+      </button>
+      <button class="card-btn" onclick="selectType('desaparecido')">
+        <span class="card-icon">🔍</span>
+        <div class="card-label">Pessoa Desaparecida</div>
+        <div class="card-desc">Informar pessoa desaparecida ou encontrada</div>
+      </button>
+      <button class="card-btn" onclick="selectType('alimentacao')">
+        <span class="card-icon">🍽️</span>
+        <div class="card-label">Ponto de Alimentação</div>
+        <div class="card-desc">Local que distribui refeições ou lanches</div>
+      </button>
+      <button class="card-btn" onclick="selectType('comunidade')">
+        <span class="card-icon">🏘️</span>
+        <div class="card-label">Comunidade / Bairro</div>
+        <div class="card-desc">Bairro ou comunidade com necessidades urgentes</div>
+      </button>
+      <button class="card-btn" onclick="selectType('voluntario')">
+        <span class="card-icon">🙋</span>
+        <div class="card-label">Oferecer Ajuda</div>
+        <div class="card-desc">Me disponho a ajudar como voluntário</div>
+      </button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">← Voltar</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ STEP 3 — FORMULÁRIOS ═══════════════════════════════ -->
+  <div class="step" id="step-3">
+
+    <div class="step-indicator">
+      <div class="step-dot done">
+        <div class="step-dot-circle">✓</div>
+        <div class="step-dot-label">Cidade</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot done">
+        <div class="step-dot-circle">✓</div>
+        <div class="step-dot-label">Tipo</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot active">
+        <div class="step-dot-circle">3</div>
+        <div class="step-dot-label">Cadastro</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle">4</div>
+        <div class="step-dot-label">Concluído</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-context-bar">
+        <span>📍</span>
+        <span class="ctx-tag" id="ctx-city">—</span>
+        <span>→</span>
+        <span class="ctx-tag" id="ctx-type">—</span>
+        &nbsp;
+        <a href="#" onclick="goStep(2);return false;" style="color:rgba(255,255,255,.7);font-size:12px;margin-left:auto;">Trocar tipo</a>
+      </div>
+
+      <!-- FORM: ABRIGO -->
+      <form id="form-abrigo" class="form-type" style="display:none" onsubmit="submitForm(event,'abrigo')">
+        <p class="section-title">Informações do Abrigo</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do local <span class="req">*</span></label>
+            <input type="text" name="nome_local" placeholder="Ex: Escola Municipal João Pessoa" required />
+          </div>
+          <div class="form-group">
+            <label>Responsável <span class="req">*</span></label>
+            <input type="text" name="responsavel" placeholder="Nome do responsável" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefone / WhatsApp <span class="req">*</span></label>
+            <input type="tel" name="telefone" placeholder="(32) 99999-0000" required />
+          </div>
+          <div class="form-group">
+            <label>Vagas disponíveis <span class="req">*</span></label>
+            <input type="number" name="vagas" placeholder="Ex: 50" min="0" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Endereço completo <span class="req">*</span></label>
+          <input type="text" name="endereco" placeholder="Rua, número, bairro" required />
+        </div>
+        <div class="form-group">
+          <label>Recursos disponíveis <span class="tip">(marque o que tem)</span></label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="recursos" value="Água potável" /><span>Água potável</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="recursos" value="Alimentação" /><span>Alimentação</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="recursos" value="Banheiros" /><span>Banheiros</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="recursos" value="Colchões / camas" /><span>Colchões / camas</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="recursos" value="Energia elétrica" /><span>Energia elétrica</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="recursos" value="Atendimento médico" /><span>Atendimento médico</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Aceita animais de estimação?</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="animais" value="Sim" /><span>Sim</span></label>
+            <label class="radio-item"><input type="radio" name="animais" value="Não" /><span>Não</span></label>
+            <label class="radio-item"><input type="radio" name="animais" value="Consultar" /><span>Consultar</span></label>
+          </div>
+        </div>
+        <hr class="divider"/>
+        <p class="section-title">Necessidades do Abrigo</p>
+        <div class="form-group">
+          <label>O que precisa AGORA <span class="req">*</span> <span class="tip">(seja específico: quantidade, tipo)</span></label>
+          <textarea name="necessidades" placeholder="Ex: 100 cobertores, 50 colchões, água mineral, fraldas G..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label>O que NÃO precisa <span class="tip">(evita desperdício)</span></label>
+          <textarea name="nao_precisa" placeholder="Ex: Roupas adulto masculino, alimentos perecíveis..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Prioridade <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="prioridade" value="Alta" required /><span style="color:var(--red);font-weight:700">Alta</span></label>
+            <label class="radio-item"><input type="radio" name="prioridade" value="Média" /><span style="color:var(--gold);font-weight:700">Média</span></label>
+            <label class="radio-item"><input type="radio" name="prioridade" value="Baixa" /><span style="color:var(--green);font-weight:700">Baixa</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Observações</label>
+          <textarea name="obs" placeholder="Informações adicionais importantes..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)">← Voltar</button>
+          <button type="submit" class="btn btn-primary">Enviar Cadastro →</button>
+        </div>
+      </form>
+
+      <!-- FORM: DOAÇÃO -->
+      <form id="form-doacao" class="form-type" style="display:none" onsubmit="submitForm(event,'doacao')">
+        <p class="section-title">Informações do Ponto de Doação</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do ponto <span class="req">*</span></label>
+            <input type="text" name="nome_local" placeholder="Ex: Igreja São João, Mercado Central" required />
+          </div>
+          <div class="form-group">
+            <label>Responsável <span class="req">*</span></label>
+            <input type="text" name="responsavel" placeholder="Nome do responsável" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefone / WhatsApp <span class="req">*</span></label>
+            <input type="tel" name="telefone" placeholder="(32) 99999-0000" required />
+          </div>
+          <div class="form-group">
+            <label>Horário de funcionamento</label>
+            <input type="text" name="horario" placeholder="Ex: Seg a Sex 8h-18h, Sáb 8h-12h" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Endereço completo <span class="req">*</span></label>
+          <input type="text" name="endereco" placeholder="Rua, número, bairro, ponto de referência" required />
+        </div>
+        <div class="form-group">
+          <label>O que aceita <span class="tip">(marque todos que se aplicam)</span></label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Roupas adulto" /><span>👕 Roupas adulto</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Roupas infantil" /><span>👶 Roupas infantil</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Alimentos não perecíveis" /><span>🍞 Alimentos não perecíveis</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Higiene pessoal" /><span>🧴 Higiene pessoal</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Material de limpeza" /><span>🧹 Material de limpeza</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Colchões / cobertores" /><span>🛏️ Colchões / cobertores</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Medicamentos" /><span>💊 Medicamentos (verificar validade)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="aceita" value="Dinheiro / PIX" /><span>💰 Dinheiro / PIX</span></label>
+          </div>
+        </div>
+        <hr class="divider"/>
+        <p class="section-title">Chave PIX para Doações Financeiras</p>
+        <div class="alert alert-info">
+          <span>ℹ️</span>
+          <span>Preencha somente se este ponto também recebe doações financeiras. A chave PIX será exibida publicamente.</span>
+        </div>
+        <div class="pix-box">
+          <div class="pix-title">💰 Dados da Chave PIX</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tipo da chave PIX</label>
+              <select name="pix_tipo">
+                <option value="">— Não recebe PIX —</option>
+                <option value="CPF">CPF</option>
+                <option value="CNPJ">CNPJ</option>
+                <option value="E-mail">E-mail</option>
+                <option value="Telefone">Telefone</option>
+                <option value="Chave aleatória">Chave aleatória</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Chave PIX <span class="tip">(copie e cole exata)</span></label>
+              <input type="text" name="pix_chave" placeholder="Ex: (32) 99999-0000 ou CPF/CNPJ" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nome do titular da conta PIX</label>
+            <input type="text" name="pix_titular" placeholder="Nome completo ou razão social" />
+          </div>
+        </div>
+        <hr class="divider"/>
+        <div class="form-group">
+          <label>Observações</label>
+          <textarea name="obs" placeholder="Informações importantes para quem vai doar..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)">← Voltar</button>
+          <button type="submit" class="btn btn-primary">Enviar Cadastro →</button>
+        </div>
+      </form>
+
+      <!-- FORM: DESAPARECIDO -->
+      <form id="form-desaparecido" class="form-type" style="display:none" onsubmit="submitForm(event,'desaparecido')">
+        <p class="section-title">Dados da Pessoa Desaparecida</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome completo <span class="req">*</span></label>
+            <input type="text" name="nome_pessoa" placeholder="Nome da pessoa desaparecida" required />
+          </div>
+          <div class="form-group">
+            <label>Idade aproximada <span class="req">*</span></label>
+            <input type="number" name="idade" placeholder="Ex: 45" min="0" max="120" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descrição física <span class="req">*</span></label>
+          <textarea name="descricao" placeholder="Ex: Homem, 1,70m, pele morena, cabelos grisalhos, usando camiseta azul e calça jeans..." required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Última vez visto (data/hora)</label>
+            <input type="datetime-local" name="ultima_vez" />
+          </div>
+          <div class="form-group">
+            <label>Local onde foi visto pela última vez</label>
+            <input type="text" name="local_visto" placeholder="Bairro, rua, endereço aproximado" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tem alguma condição de saúde? <span class="tip">(importante para resgate)</span></label>
+          <input type="text" name="saude" placeholder="Ex: Diabético, usa insulina; alzheimer; cadeirante..." />
+        </div>
+        <hr class="divider"/>
+        <p class="section-title">Quem está informando</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Seu nome <span class="req">*</span></label>
+            <input type="text" name="informante_nome" placeholder="Nome de quem está reportando" required />
+          </div>
+          <div class="form-group">
+            <label>Seu telefone / WhatsApp <span class="req">*</span></label>
+            <input type="tel" name="informante_tel" placeholder="(32) 99999-0000" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Relação com a pessoa</label>
+          <input type="text" name="relacao" placeholder="Ex: Familiar, vizinho, amigo..." />
+        </div>
+        <div class="form-group">
+          <label>Observações adicionais</label>
+          <textarea name="obs" placeholder="Qualquer informação que ajude a encontrar a pessoa..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)">← Voltar</button>
+          <button type="submit" class="btn btn-red">Reportar Desaparecido →</button>
+        </div>
+      </form>
+
+      <!-- FORM: ALIMENTAÇÃO -->
+      <form id="form-alimentacao" class="form-type" style="display:none" onsubmit="submitForm(event,'alimentacao')">
+        <p class="section-title">Informações do Ponto de Alimentação</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do local <span class="req">*</span></label>
+            <input type="text" name="nome_local" placeholder="Ex: Cozinha Comunitária do Bairro X" required />
+          </div>
+          <div class="form-group">
+            <label>Responsável <span class="req">*</span></label>
+            <input type="text" name="responsavel" placeholder="Nome do responsável" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefone / WhatsApp <span class="req">*</span></label>
+            <input type="tel" name="telefone" placeholder="(32) 99999-0000" required />
+          </div>
+          <div class="form-group">
+            <label>Capacidade de atendimento</label>
+            <input type="text" name="capacidade" placeholder="Ex: até 200 refeições/dia" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Endereço completo <span class="req">*</span></label>
+          <input type="text" name="endereco" placeholder="Rua, número, bairro, ponto de referência" required />
+        </div>
+        <div class="form-group">
+          <label>Horário de distribuição</label>
+          <input type="text" name="horario" placeholder="Ex: Café 7h, Almoço 11h30-13h, Jantar 18h-19h30" />
+        </div>
+        <div class="form-group">
+          <label>Tipo de refeição <span class="tip">(marque todos que se aplicam)</span></label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="refeicao" value="Café da manhã" /><span>☕ Café da manhã</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="refeicao" value="Almoço" /><span>🍽️ Almoço</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="refeicao" value="Jantar" /><span>🌙 Jantar</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="refeicao" value="Lanche" /><span>🥪 Lanche</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="refeicao" value="Alimentação para bebês" /><span>🍼 Alimentação para bebês</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Precisa de voluntários?</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="voluntarios" value="Sim, urgente" /><span>Sim, urgente</span></label>
+            <label class="radio-item"><input type="radio" name="voluntarios" value="Sim, mas não urgente" /><span>Sim, mas não urgente</span></label>
+            <label class="radio-item"><input type="radio" name="voluntarios" value="Não" /><span>Não</span></label>
+          </div>
+        </div>
+        <hr class="divider"/>
+        <div class="form-group">
+          <label>O que precisa de doação AGORA</label>
+          <textarea name="necessidades" placeholder="Ex: 20kg de arroz, feijão, óleo de cozinha, gás de cozinha..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Observações</label>
+          <textarea name="obs" placeholder="Informações importantes para doadores e voluntários..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)">← Voltar</button>
+          <button type="submit" class="btn btn-primary">Enviar Cadastro →</button>
+        </div>
+      </form>
+
+      <!-- FORM: COMUNIDADE -->
+      <form id="form-comunidade" class="form-type" style="display:none" onsubmit="submitForm(event,'comunidade')">
+        <p class="section-title">Informações da Comunidade / Bairro</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do bairro / comunidade <span class="req">*</span></label>
+            <input type="text" name="nome_local" placeholder="Ex: Bairro Cascatinha, Vila Esperança..." required />
+          </div>
+          <div class="form-group">
+            <label>Liderança / responsável <span class="req">*</span></label>
+            <input type="text" name="responsavel" placeholder="Nome do líder comunitário ou representante" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefone / WhatsApp <span class="req">*</span></label>
+            <input type="tel" name="telefone" placeholder="(32) 99999-0000" required />
+          </div>
+          <div class="form-group">
+            <label>Famílias afetadas (estimativa)</label>
+            <input type="number" name="familias" placeholder="Ex: 150" min="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Endereço de referência <span class="req">*</span></label>
+          <input type="text" name="endereco" placeholder="Rua principal, praça central ou ponto de referência" required />
+        </div>
+        <div class="form-group">
+          <label>Necessidades urgentes <span class="tip">(marque todas)</span></label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Água potável" /><span>💧 Água potável</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Alimentos" /><span>🍞 Alimentos</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Roupas e agasalhos" /><span>👕 Roupas e agasalhos</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Cobertores e colchões" /><span>🛏️ Cobertores e colchões</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Higiene pessoal" /><span>🧴 Higiene pessoal</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Material de limpeza" /><span>🧹 Material de limpeza</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Atendimento médico" /><span>🏥 Atendimento médico</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Resgate / remoção" /><span>🚒 Resgate / remoção</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Abrigo temporário" /><span>🏠 Abrigo temporário</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="necessidades" value="Voluntários" /><span>🙋 Voluntários</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>O que NÃO precisa <span class="tip">(ajuda a direcionar doações)</span></label>
+          <textarea name="nao_precisa" placeholder="Ex: Roupas masculinas adulto, alimentos perecíveis..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Prioridade <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="prioridade" value="Alta" required /><span style="color:var(--red);font-weight:700">Alta — situação crítica</span></label>
+            <label class="radio-item"><input type="radio" name="prioridade" value="Média" /><span style="color:var(--gold);font-weight:700">Média</span></label>
+            <label class="radio-item"><input type="radio" name="prioridade" value="Baixa" /><span style="color:var(--green);font-weight:700">Baixa</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Situação atual e observações <span class="req">*</span></label>
+          <textarea name="obs" placeholder="Descreva a situação: o que aconteceu, quantas pessoas afetadas, o que já foi feito..." required></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)">← Voltar</button>
+          <button type="submit" class="btn btn-primary">Enviar Cadastro →</button>
+        </div>
+      </form>
+
+      <!-- FORM: VOLUNTÁRIO -->
+      <form id="form-voluntario" class="form-type" style="display:none" onsubmit="submitForm(event,'voluntario')">
+        <p class="section-title">Seus Dados</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Seu nome <span class="req">*</span></label>
+            <input type="text" name="nome" placeholder="Nome completo" required />
+          </div>
+          <div class="form-group">
+            <label>Telefone / WhatsApp <span class="req">*</span></label>
+            <input type="tel" name="telefone" placeholder="(32) 99999-0000" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Bairro / Localização</label>
+          <input type="text" name="bairro" placeholder="Ex: Centro, Cascatinha..." />
+        </div>
+        <div class="form-group">
+          <label>Tem veículo disponível?</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="veiculo" value="Sim, carro" /><span>Sim, carro</span></label>
+            <label class="radio-item"><input type="radio" name="veiculo" value="Sim, moto" /><span>Sim, moto</span></label>
+            <label class="radio-item"><input type="radio" name="veiculo" value="Não" /><span>Não</span></label>
+          </div>
+        </div>
+        <hr class="divider"/>
+        <p class="section-title">Como Posso Ajudar</p>
+        <div class="form-group">
+          <label>Habilidades / disponibilidade <span class="tip">(marque tudo que puder)</span></label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Transporte de doações" /><span>🚗 Transporte de doações</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Cozinhar / preparar alimentos" /><span>🍳 Cozinhar / preparar alimentos</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Trabalho físico (limpeza, carga)" /><span>💪 Trabalho físico (limpeza, carga)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Saúde / primeiros socorros" /><span>🏥 Saúde / primeiros socorros</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Apoio psicológico" /><span>🧠 Apoio psicológico</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Organização de doações" /><span>📦 Organização de doações</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Divulgação / redes sociais" /><span>📱 Divulgação / redes sociais</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="habilidade" value="Hospedagem na minha casa" /><span>🏠 Hospedar pessoas na minha casa</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Disponibilidade de horário</label>
+          <input type="text" name="disponibilidade" placeholder="Ex: Manhãs e tarde, final de semana integral..." />
+        </div>
+        <div class="form-group">
+          <label>Observações / outras habilidades</label>
+          <textarea name="obs" placeholder="Médico, psicólogo, engenheiro, tem barco, fala outro idioma..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)">← Voltar</button>
+          <button type="submit" class="btn btn-green">Me Cadastrar como Voluntário →</button>
+        </div>
+      </form>
+
+    </div><!-- .form-card -->
+  </div><!-- #step-3 -->
+
+  <!-- ═══════════════════════════════ STEP 4 — CONFIRMAÇÃO ═══════════════════════════════ -->
+  <div class="step" id="step-4">
+
+    <div class="step-indicator">
+      <div class="step-dot done"><div class="step-dot-circle">✓</div><div class="step-dot-label">Cidade</div></div>
+      <div class="step-line"></div>
+      <div class="step-dot done"><div class="step-dot-circle">✓</div><div class="step-dot-label">Tipo</div></div>
+      <div class="step-line"></div>
+      <div class="step-dot done"><div class="step-dot-circle">✓</div><div class="step-dot-label">Cadastro</div></div>
+      <div class="step-line"></div>
+      <div class="step-dot active"><div class="step-dot-circle">4</div><div class="step-dot-label">Concluído</div></div>
+    </div>
+
+    <div class="success-card">
+      <div class="success-icon">✅</div>
+      <h2>Cadastro registrado!</h2>
+      <p>Seus dados foram salvos com sucesso. Compartilhe pelo WhatsApp para ampliar o alcance e facilitar a coordenação.</p>
+
+      <div class="summary-box" id="summary-text">—</div>
+
+      <div class="btn-row" style="justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-whatsapp" onclick="shareWhatsApp()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.558 4.112 1.524 5.84L.057 23.273a.5.5 0 0 0 .67.67l5.433-1.467A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.95 0-3.78-.526-5.354-1.44l-.381-.228-3.954 1.068 1.068-3.954-.228-.381A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Compartilhar no WhatsApp
+        </button>
+        <button class="btn btn-secondary" onclick="copyText()">📋 Copiar texto</button>
+        <button class="btn btn-primary" onclick="newEntry()">+ Novo Cadastro</button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+</div><!-- .page-layout -->
+
+<!-- FOOTER -->
+<footer>
+  <strong>Ajude JF</strong> — Central de Apoio Emergencial &nbsp;|&nbsp;
+  Emergência: <strong>193</strong> · <strong>192</strong> · <strong>199</strong><br>
+  <small style="opacity:.6">Esta plataforma é uma iniciativa voluntária de apoio à comunidade. Não substitui serviços de emergência oficiais.</small>
+</footer>
+
+<script>
+  // ── STATE ──
+  const state = {
+    city: '',
+    type: '',
+    data: {}
+  };
+
+  const typeLabels = {
+    abrigo:       '🏠 Abrigo',
+    doacao:       '📦 Ponto de Doação',
+    desaparecido: '🔍 Pessoa Desaparecida',
+    alimentacao:  '🍽️ Ponto de Alimentação',
+    comunidade:   '🏘️ Comunidade / Bairro',
+    voluntario:   '🙋 Oferecer Ajuda'
+  };
+
+  // ── NAVIGATION ──
+  function goStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectCity(city) {
+    state.city = city;
+    document.getElementById('selected-city-label').textContent = city;
+    document.getElementById('ctx-city').textContent = city;
+    goStep(2);
+  }
+
+  function selectType(type) {
+    state.type = type;
+    document.getElementById('ctx-type').textContent = typeLabels[type] || type;
+
+    // Hide all forms, show selected
+    document.querySelectorAll('.form-type').forEach(f => f.style.display = 'none');
+    const form = document.getElementById('form-' + type);
+    if (form) form.style.display = 'block';
+
+    goStep(3);
+  }
+
+  // ── FORM SUBMIT ──
+  function submitForm(event, type) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = {};
+
+    formData.forEach((value, key) => {
+      if (data[key]) {
+        // Multiple values (checkboxes)
+        if (!Array.isArray(data[key])) data[key] = [data[key]];
+        data[key].push(value);
+      } else {
+        data[key] = value;
+      }
+    });
+
+    state.data = data;
+    const summary = buildSummary(state.city, type, data);
+    document.getElementById('summary-text').textContent = summary;
+    goStep(4);
+  }
+
+  // ── BUILD SUMMARY ──
+  function buildSummary(city, type, data) {
+    const now = new Date().toLocaleString('pt-BR');
+    let lines = [];
+    lines.push('=== AJUDE JF — ' + (typeLabels[type] || type).toUpperCase() + ' ===');
+    lines.push('📍 Cidade: ' + city);
+    lines.push('📅 Data/hora: ' + now);
+    lines.push('');
+
+    const labelMap = {
+      nome_local:       'Local',
+      nome_pessoa:      'Nome da pessoa',
+      nome:             'Nome',
+      responsavel:      'Responsável',
+      telefone:         'Telefone/WhatsApp',
+      endereco:         'Endereço',
+      vagas:            'Vagas disponíveis',
+      recursos:         'Recursos disponíveis',
+      animais:          'Aceita animais',
+      necessidades:     'Necessidades AGORA',
+      nao_precisa:      'NÃO precisa',
+      prioridade:       'Prioridade',
+      horario:          'Horário',
+      aceita:           'O que aceita',
+      pix_tipo:         'Tipo da chave PIX',
+      pix_chave:        'Chave PIX',
+      pix_titular:      'Titular PIX',
+      refeicao:         'Tipo de refeição',
+      voluntarios:      'Precisa voluntários',
+      capacidade:       'Capacidade',
+      familias:         'Famílias afetadas',
+      descricao:        'Descrição física',
+      ultima_vez:       'Última vez visto',
+      local_visto:      'Local visto',
+      saude:            'Condição de saúde',
+      informante_nome:  'Informante',
+      informante_tel:   'Tel. informante',
+      relacao:          'Relação',
+      idade:            'Idade',
+      bairro:           'Bairro',
+      veiculo:          'Veículo',
+      habilidade:       'Habilidades',
+      disponibilidade:  'Disponibilidade',
+      obs:              'Observações'
+    };
+
+    for (const [key, val] of Object.entries(data)) {
+      if (!val || val === '' || val === '— Não recebe PIX —') continue;
+      const label = labelMap[key] || key;
+      const value = Array.isArray(val) ? val.join(', ') : val;
+      lines.push('• ' + label + ': ' + value);
+    }
+
+    lines.push('');
+    lines.push('Registrado em ajudejf.com.br');
+    return lines.join('\n');
+  }
+
+  // ── SHARE ──
+  function shareWhatsApp() {
+    const text = document.getElementById('summary-text').textContent;
+    const encoded = encodeURIComponent(text);
+    window.open('https://wa.me/?text=' + encoded, '_blank');
+  }
+
+  function copyText() {
+    const text = document.getElementById('summary-text').textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => alert('Texto copiado!'));
+    } else {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      alert('Texto copiado!');
+    }
+  }
+
+  function newEntry() {
+    // Reset all forms
+    document.querySelectorAll('.form-type').forEach(f => {
+      f.reset();
+      f.style.display = 'none';
+    });
+    state.city = '';
+    state.type = '';
+    state.data = {};
+    goStep(1);
+  }
+</script>
+
+</body>
+</html>
