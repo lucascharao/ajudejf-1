@@ -1,9 +1,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary-dark:  #5d4037;
-      --primary-main:  #ff8f00;
-      --primary-light: #ffb74d;
+      --primary-dark:  #2b5f7e;
+      --primary-main:  #6B9DB8;
+      --primary-light: #a3c7d9;
       --accent:        #43a047;
       --red:           #c0392b;
       --red-light:     #e74c3c;
@@ -36,7 +36,7 @@
 
     /* ── EMERGENCY BANNER ── */
     .emergency-banner {
-      background: linear-gradient(135deg, var(--primary-main), var(--primary-dark));
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
       color: var(--white);
       text-align: center;
       padding: 10px 16px;
@@ -291,7 +291,7 @@
     }
     .card-btn.selected {
       border-color: var(--primary-main);
-      background: #fff8e6;
+      background: #e8f4f8;
     }
     .card-icon {
       display: flex;
@@ -384,7 +384,7 @@
     input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--primary-main);
-      box-shadow: 0 0 0 3px rgba(255,143,0,.1);
+      box-shadow: 0 0 0 3px rgba(107,157,184,.15);
     }
     textarea { resize: vertical; min-height: 90px; }
 
@@ -517,7 +517,7 @@
       margin-top: 8px;
       padding: 10px 16px;
       background: linear-gradient(135deg, #f6c84b 0%, #f0b429 100%);
-      color: #5d4037;
+      color: #2b5f7e;
       border: none;
       border-radius: var(--radius);
       font-size: 14px;
@@ -581,7 +581,7 @@
       margin: 0 0 16px;
       font-size: 15px;
       font-weight: 600;
-      color: #5d4037;
+      color: #2b5f7e;
     }
 
     .pix-lightbox-img {
@@ -598,7 +598,7 @@
       display: inline-block;
       margin-top: 16px;
       padding: 10px 20px;
-      background: #5d4037;
+      background: #2b5f7e;
       color: #fff;
       border: none;
       border-radius: var(--radius);
@@ -607,7 +607,7 @@
       cursor: pointer;
       transition: background .15s;
     }
-    .pix-lightbox-download:hover { background: #795548; }
+    .pix-lightbox-download:hover { background: #3a7a9e; }
 
     .divider {
       border: none;
@@ -827,7 +827,7 @@
     .consulta-filters select:focus {
       outline: none;
       border-color: var(--primary-main);
-      box-shadow: 0 0 0 3px rgba(255,143,0,.1);
+      box-shadow: 0 0 0 3px rgba(107,157,184,.15);
     }
 
     /* ── CONSULTA STATES ── */
