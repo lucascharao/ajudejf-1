@@ -42,45 +42,94 @@ window.selectType = function (type) {
   goStep(3)
 }
 
+// ── MAPA: tipo → tabela e campos ──
+const TIPO_TABELA = {
+  abrigo:       'abrigos',
+  doacao:       'pontos_doacao',
+  desaparecido: 'desaparecidos',
+  alimentacao:  'pontos_alimentacao',
+  comunidade:   'comunidades',
+  voluntario:   'voluntarios'
+}
+
+// Campos que devem virar arrays (checkboxes múltiplos)
+const CAMPOS_ARRAY = new Set([
+  'recursos', 'aceita', 'refeicao', 'necessidades', 'habilidade'
+])
+
+// Mapa de nomes de campo do form → coluna da tabela
+const CAMPO_COLUNA = {
+  refeicao:     'refeicoes',
+  habilidade:   'habilidades',
+  pix_tipo:     'pix_tipo',
+  pix_chave:    'pix_chave',
+  pix_titular:  'pix_titular',
+  ultima_vez:   'ultima_vez_visto',
+  saude:        'condicao_saude',
+  informante_nome: 'informante_nome',
+  informante_tel:  'informante_tel',
+}
+
+// Carrega cidade_id a partir do nome (cache simples)
+const cidadeCache = {}
+async function getCidadeId(nome) {
+  if (cidadeCache[nome]) return cidadeCache[nome]
+  const { data, error } = await supabase
+    .from('cidades')
+    .select('id')
+    .eq('nome', nome)
+    .single()
+  if (error || !data) throw new Error(`Cidade não encontrada: ${nome}`)
+  cidadeCache[nome] = data.id
+  return data.id
+}
+
 // ── FORM SUBMIT ──
 window.submitForm = async function (event, tipo) {
   event.preventDefault()
   const form = event.target
   const submitBtn = form.querySelector('[type="submit"]')
 
-  // Loading state
   const originalText = submitBtn.innerHTML
   submitBtn.innerHTML = 'Salvando...'
   submitBtn.disabled = true
 
-  const dados = collectFormData(form)
-  state.data = dados
-
-  // Remove error if exists
   const existingError = form.querySelector('.form-error')
   if (existingError) existingError.remove()
 
-  const { error } = await supabase.from('registros').insert({
-    cidade: state.city,
-    tipo,
-    dados
-  })
+  try {
+    const cidade_id = await getCidadeId(state.city)
+    const formRaw = collectFormData(form)
+    state.data = formRaw
 
-  if (error) {
+    // Monta payload para a tabela correta
+    const payload = { cidade_id }
+    for (const [key, val] of Object.entries(formRaw)) {
+      if (!val || val === '' || val === '— Não recebe PIX —') continue
+      const coluna = CAMPO_COLUNA[key] || key
+      payload[coluna] = CAMPOS_ARRAY.has(key)
+        ? (Array.isArray(val) ? val : [val])
+        : val
+    }
+
+    const tabela = TIPO_TABELA[tipo]
+    const { error } = await supabase.from(tabela).insert(payload)
+
+    if (error) throw error
+
+    const summary = buildSummary(state.city, tipo, formRaw)
+    document.getElementById('summary-text').textContent = summary
+    goStep(4)
+
+  } catch (err) {
     submitBtn.innerHTML = originalText
     submitBtn.disabled = false
     const errEl = document.createElement('div')
     errEl.className = 'alert alert-warning form-error'
     errEl.style.marginTop = '16px'
-    errEl.innerHTML = `<span>⚠️</span><span>Erro ao salvar: ${error.message}. Tente novamente.</span>`
+    errEl.innerHTML = `<span>⚠️</span><span>Erro ao salvar: ${err.message}. Tente novamente.</span>`
     form.appendChild(errEl)
-    return
   }
-
-  // Success
-  const summary = buildSummary(state.city, tipo, dados)
-  document.getElementById('summary-text').textContent = summary
-  goStep(4)
 }
 
 // ── COLLECT FORM DATA ──
