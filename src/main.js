@@ -238,3 +238,241 @@ window.newEntry = function () {
   state.data = {}
   goStep(1)
 }
+
+// ═══════════════════════════════════════════════════════
+// VIEWS — HOME / CADASTRAR / CONSULTAR
+// ═══════════════════════════════════════════════════════
+
+window.showView = function (view) {
+  document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'))
+  document.getElementById('view-' + view).classList.add('active')
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  if (view === 'consultar') loadConsulta()
+  if (view === 'cadastrar') goStep(1)
+}
+
+// ═══════════════════════════════════════════════════════
+// CONSULTA — HELPERS
+// ═══════════════════════════════════════════════════════
+
+function esc (str) {
+  if (str == null) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function formatWpp (tel) {
+  if (!tel) return ''
+  const d = tel.replace(/\D/g, '')
+  return d.length >= 10 ? '55' + d.slice(-11) : d
+}
+
+function formatDate (dt) {
+  if (!dt) return '—'
+  return new Date(dt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+}
+
+function chips (arr) {
+  if (!arr || arr.length === 0) return ''
+  return `<div class="rc-chips">${arr.map(v => `<span class="chip">${esc(v)}</span>`).join('')}</div>`
+}
+
+function prioBadge (p) {
+  const map = { Alta: 'badge-red', Média: 'badge-gold', Baixa: 'badge-green' }
+  return p ? `<span class="badge ${map[p] || ''}">${esc(p)}</span>` : ''
+}
+
+function wppBtn (tel, label = 'WhatsApp') {
+  if (!tel) return ''
+  return `<a href="https://wa.me/${formatWpp(tel)}" target="_blank" rel="noopener" class="rc-wpp">📱 ${label}</a>`
+}
+
+// ═══════════════════════════════════════════════════════
+// CONSULTA — CARDS POR TABELA
+// ═══════════════════════════════════════════════════════
+
+function cardAbrigo (item, cidade) {
+  return `
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-title">${esc(item.nome_local)}</div>
+        ${prioBadge(item.prioridade)}
+      </div>
+      <div class="rc-city">📍 ${esc(cidade)} — ${esc(item.endereco)}</div>
+      <div class="rc-body">
+        <div class="rc-row">🛏️ <strong>${item.vagas ?? '—'}</strong> vagas disponíveis</div>
+        ${item.aceita_animais ? `<div class="rc-row">🐾 Animais: ${esc(item.aceita_animais)}</div>` : ''}
+        ${item.necessidades ? `<div class="rc-row rc-needs">⚠️ Precisa agora: ${esc(item.necessidades)}</div>` : ''}
+        ${chips(item.recursos)}
+      </div>
+      ${wppBtn(item.telefone)}
+    </div>`
+}
+
+function cardDoacao (item, cidade) {
+  return `
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-title">${esc(item.nome_local)}</div>
+      </div>
+      <div class="rc-city">📍 ${esc(cidade)} — ${esc(item.endereco)}</div>
+      <div class="rc-body">
+        ${item.horario ? `<div class="rc-row">🕐 ${esc(item.horario)}</div>` : ''}
+        ${chips(item.aceita)}
+        ${item.pix_chave ? `<div class="rc-row rc-pix">💰 PIX (${esc(item.pix_tipo)}): <strong>${esc(item.pix_chave)}</strong>${item.pix_titular ? ` — ${esc(item.pix_titular)}` : ''}</div>` : ''}
+      </div>
+      ${wppBtn(item.telefone)}
+    </div>`
+}
+
+function cardDesaparecido (item, cidade) {
+  return `
+    <div class="result-card result-card-urgente">
+      <div class="rc-header">
+        <div class="rc-title">${esc(item.nome_pessoa)}</div>
+        <span class="badge badge-red">Desaparecido</span>
+      </div>
+      <div class="rc-city">📍 ${esc(cidade)}</div>
+      <div class="rc-body">
+        ${item.idade ? `<div class="rc-row">🎂 ${item.idade} anos</div>` : ''}
+        <div class="rc-row">📝 ${esc(item.descricao)}</div>
+        ${item.ultima_vez_visto ? `<div class="rc-row">🕐 Última vez: ${formatDate(item.ultima_vez_visto)}${item.local_visto ? ` — ${esc(item.local_visto)}` : ''}</div>` : ''}
+        ${item.condicao_saude ? `<div class="rc-row rc-needs">🏥 Saúde: ${esc(item.condicao_saude)}</div>` : ''}
+      </div>
+      <div class="rc-footer-info">Informante: ${esc(item.informante_nome)}</div>
+      ${wppBtn(item.informante_tel, 'Contatar informante')}
+    </div>`
+}
+
+function cardAlimentacao (item, cidade) {
+  return `
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-title">${esc(item.nome_local)}</div>
+        ${item.precisa_voluntarios === 'Sim, urgente' ? '<span class="badge badge-red">Voluntários urgente</span>' : ''}
+      </div>
+      <div class="rc-city">📍 ${esc(cidade)} — ${esc(item.endereco)}</div>
+      <div class="rc-body">
+        ${item.horario ? `<div class="rc-row">🕐 ${esc(item.horario)}</div>` : ''}
+        ${item.capacidade ? `<div class="rc-row">👥 ${esc(item.capacidade)}</div>` : ''}
+        ${chips(item.refeicoes)}
+        ${item.necessidades ? `<div class="rc-row rc-needs">⚠️ Precisa: ${esc(item.necessidades)}</div>` : ''}
+      </div>
+      ${wppBtn(item.telefone)}
+    </div>`
+}
+
+function cardComunidade (item, cidade) {
+  return `
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-title">${esc(item.nome_local)}</div>
+        ${prioBadge(item.prioridade)}
+      </div>
+      <div class="rc-city">📍 ${esc(cidade)} — ${esc(item.endereco)}</div>
+      <div class="rc-body">
+        ${item.familias ? `<div class="rc-row">👨‍👩‍👧 ~${item.familias} famílias afetadas</div>` : ''}
+        ${chips(item.necessidades)}
+        ${item.obs ? `<div class="rc-row">${esc(item.obs)}</div>` : ''}
+      </div>
+      ${wppBtn(item.telefone)}
+    </div>`
+}
+
+function cardVoluntario (item, cidade) {
+  return `
+    <div class="result-card result-card-voluntario">
+      <div class="rc-header">
+        <div class="rc-title">${esc(item.nome)}</div>
+        ${item.veiculo && item.veiculo !== 'Não' ? `<span class="badge badge-blue">${esc(item.veiculo)}</span>` : ''}
+      </div>
+      <div class="rc-city">📍 ${esc(cidade)}${item.bairro ? ` — ${esc(item.bairro)}` : ''}</div>
+      <div class="rc-body">
+        ${chips(item.habilidades)}
+        ${item.disponibilidade ? `<div class="rc-row">🕐 ${esc(item.disponibilidade)}</div>` : ''}
+      </div>
+      ${wppBtn(item.telefone)}
+    </div>`
+}
+
+const TABELA_CONFIG = {
+  abrigos:            { icon: '🏠', label: 'Abrigos',           card: cardAbrigo },
+  pontos_doacao:      { icon: '📦', label: 'Pontos de Doação',  card: cardDoacao },
+  desaparecidos:      { icon: '🔍', label: 'Desaparecidos',     card: cardDesaparecido },
+  pontos_alimentacao: { icon: '🍽️', label: 'Alimentação',       card: cardAlimentacao },
+  comunidades:        { icon: '🏘️', label: 'Comunidades',       card: cardComunidade },
+  voluntarios:        { icon: '🙋', label: 'Voluntários',       card: cardVoluntario },
+}
+
+// ═══════════════════════════════════════════════════════
+// CONSULTA — LOAD & RENDER
+// ═══════════════════════════════════════════════════════
+
+window.loadConsulta = async function () {
+  const cityFilter = document.getElementById('filter-city').value
+  const typeFilter = document.getElementById('filter-type').value
+  const elLoading  = document.getElementById('consulta-loading')
+  const elEmpty    = document.getElementById('consulta-empty')
+  const elError    = document.getElementById('consulta-error')
+  const elResults  = document.getElementById('consulta-results')
+
+  elLoading.style.display = 'flex'
+  elEmpty.style.display   = 'none'
+  elError.style.display   = 'none'
+  elResults.innerHTML     = ''
+
+  try {
+    const { data: cidades } = await supabase.from('cidades').select('id, nome')
+    const cidadeMap = {}
+    ;(cidades || []).forEach(c => { cidadeMap[c.id] = c.nome })
+
+    const tables = typeFilter ? [typeFilter] : Object.keys(TABELA_CONFIG)
+    let totalItems = 0
+    let html = ''
+
+    for (const table of tables) {
+      let query = supabase.from(table).select('*').order('created_at', { ascending: false }).limit(100)
+
+      if (cityFilter) {
+        const cidadeId = (cidades || []).find(c => c.nome === cityFilter)?.id
+        if (cidadeId) query = query.eq('cidade_id', cidadeId)
+      }
+
+      const { data, error: err } = await query
+      if (err) throw err
+
+      const items = data || []
+      if (items.length === 0) continue
+
+      totalItems += items.length
+      const config = TABELA_CONFIG[table]
+      html += `
+        <div class="consulta-section">
+          <div class="consulta-section-header">
+            <span>${config.icon} ${config.label}</span>
+            <span class="consulta-section-count">${items.length}</span>
+          </div>
+          <div class="result-cards-grid">
+            ${items.map(item => config.card(item, cidadeMap[item.cidade_id] || '—')).join('')}
+          </div>
+        </div>`
+    }
+
+    elLoading.style.display = 'none'
+
+    if (totalItems === 0) {
+      elEmpty.style.display = 'flex'
+      return
+    }
+
+    elResults.innerHTML = html
+
+  } catch (err) {
+    elLoading.style.display = 'none'
+    document.getElementById('consulta-error-msg').textContent = 'Erro ao carregar dados: ' + err.message
+    elError.style.display = 'flex'
+  }
+}

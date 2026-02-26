@@ -67,6 +67,30 @@
 <!-- MAIN -->
 <main>
 
+  <!-- ─── HOME SELECTION ─── -->
+  <div id="view-home" class="view-section active">
+    <div class="home-hero">
+      <h2>Central de Apoio Emergencial</h2>
+      <p>O que você deseja fazer?</p>
+      <div class="home-options">
+        <button class="home-option-card" onclick="showView('cadastrar')">
+          <span class="home-option-icon">✍️</span>
+          <div class="home-option-title">Cadastrar</div>
+          <div class="home-option-desc">Registrar abrigo, ponto de doação, pessoa desaparecida, alimentação, comunidade ou voluntário</div>
+        </button>
+        <button class="home-option-card" onclick="showView('consultar')">
+          <span class="home-option-icon">🔎</span>
+          <div class="home-option-title">Consultar</div>
+          <div class="home-option-desc">Buscar abrigos, pontos de doação, desaparecidos, alimentação, comunidades e voluntários</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CADASTRAR VIEW ─── -->
+  <div id="view-cadastrar" class="view-section">
+  <button class="btn-view-back" onclick="showView('home')">← Início</button>
+
   <!-- ═══════════════════════════════ STEP 1 — CIDADE ═══════════════════════════════ -->
   <div class="step active" id="step-1">
 
@@ -657,6 +681,44 @@
     </div>
 
   </div>
+
+  </div><!-- #view-cadastrar -->
+
+  <!-- ─── CONSULTAR VIEW ─── -->
+  <div id="view-consultar" class="view-section">
+    <button class="btn-view-back" onclick="showView('home')">← Início</button>
+
+    <div class="consulta-filters">
+      <select id="filter-city" onchange="loadConsulta()">
+        <option value="">Todas as cidades</option>
+        <option value="Juiz de Fora">Juiz de Fora</option>
+        <option value="Ubá">Ubá</option>
+        <option value="Senador Firmino">Senador Firmino</option>
+        <option value="Matias Barbosa">Matias Barbosa</option>
+      </select>
+      <select id="filter-type" onchange="loadConsulta()">
+        <option value="">Todas as categorias</option>
+        <option value="abrigos">🏠 Abrigos</option>
+        <option value="pontos_doacao">📦 Pontos de Doação</option>
+        <option value="desaparecidos">🔍 Desaparecidos</option>
+        <option value="pontos_alimentacao">🍽️ Alimentação</option>
+        <option value="comunidades">🏘️ Comunidades / Bairros</option>
+        <option value="voluntarios">🙋 Voluntários</option>
+      </select>
+    </div>
+
+    <div id="consulta-loading" style="display:none" class="consulta-state">
+      <span>⏳</span><p>Carregando informações...</p>
+    </div>
+    <div id="consulta-empty" style="display:none" class="consulta-state">
+      <span>📭</span><p>Nenhum resultado encontrado para os filtros selecionados.</p>
+    </div>
+    <div id="consulta-error" style="display:none" class="consulta-state consulta-error-state">
+      <span>⚠️</span><p id="consulta-error-msg">Erro ao carregar dados.</p>
+    </div>
+
+    <div id="consulta-results"></div>
+  </div><!-- #view-consultar -->
 
 </main>
 
