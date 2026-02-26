@@ -138,6 +138,23 @@
       display: block;
       margin: 0 auto;
     }
+    .sidebar-instagram {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+      color: #c13584;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      opacity: .85;
+      transition: opacity .2s, transform .2s;
+    }
+    .sidebar-instagram:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
     .sidebar-divider {
       width: 100%;
       border: none;
